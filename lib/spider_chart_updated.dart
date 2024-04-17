@@ -17,6 +17,7 @@ class SpiderChartUpdated extends StatelessWidget {
 
   /// Optional labels for the data points
   final List<String> labels;
+  final TextStyle? labelStyle;
 
   /// The value represented by the chart perimeter
   final double? maxValue;
@@ -41,6 +42,7 @@ class SpiderChartUpdated extends StatelessWidget {
     this.fallbackWidth = 200,
     this.colorSwatch,
     this.lineColor,
+    this.labelStyle,
   })  : assert(labels.isNotEmpty ? data.length == labels.length : true,
             'Length of data and labels lists must be equal'),
         assert(colors.isNotEmpty ? colors.length == data.length : true,
@@ -79,8 +81,17 @@ class SpiderChartUpdated extends StatelessWidget {
       maxHeight: fallbackHeight,
       child: CustomPaint(
         size: size,
-        painter: SpiderChartPainter(data, calculatedMax, dataPointColors,
-            labels, decimalPrecision, lineColor ?? Colors.grey),
+        painter: SpiderChartPainter(
+          data,
+          calculatedMax,
+          dataPointColors,
+          labels,
+          labelStyle ??
+              TextStyle(
+                  color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+          decimalPrecision,
+          lineColor ?? Colors.grey,
+        ),
       ),
     );
   }
@@ -94,6 +105,7 @@ class SpiderChartPainter extends CustomPainter {
   final List<String> labels;
   final int decimalPrecision;
   final Color? lineColor;
+  final TextStyle labelStyle;
 
   final Paint spokes = Paint()..color = Colors.grey;
 
@@ -106,7 +118,7 @@ class SpiderChartPainter extends CustomPainter {
     ..style = PaintingStyle.stroke;
 
   SpiderChartPainter(this.data, this.maxNumber, this.colors, this.labels,
-      this.decimalPrecision, this.lineColor);
+      this.labelStyle, this.decimalPrecision, this.lineColor);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -136,7 +148,7 @@ class SpiderChartPainter extends CustomPainter {
     spokes.color = lineColor ?? Colors.grey;
 
     if (labels.isNotEmpty) {
-      paintLabels(canvas, center, outerPoints, labels);
+      paintLabels(canvas, center, outerPoints, labels, labelStyle);
     }
     paintGraphOutline(canvas, center, outerPoints);
     paintDataLines(canvas, dataPoints);
@@ -194,10 +206,14 @@ class SpiderChartPainter extends CustomPainter {
   }
 
   void paintLabels(
-      Canvas canvas, Offset center, List<Offset> points, List<String> labels) {
+    Canvas canvas,
+    Offset center,
+    List<Offset> points,
+    List<String> labels,
+    TextStyle labelStyle,
+  ) {
     var textPainter = TextPainter(textDirection: TextDirection.ltr);
-    var textStyle =
-        TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold);
+    var textStyle = labelStyle;
 
     for (var i = 0; i < points.length; i++) {
       textPainter.text = TextSpan(text: labels[i], style: textStyle);
